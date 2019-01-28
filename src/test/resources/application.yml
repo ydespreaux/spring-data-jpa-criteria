@@ -1,0 +1,9 @@
+# Show or not log for each sql query
+spring:
+  main:
+    banner-mode: "off"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
