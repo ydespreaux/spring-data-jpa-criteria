@@ -28,7 +28,7 @@ import javax.persistence.EntityManager;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class JpaCriteriaRepositoryFactory extends JpaRepositoryFactory {
 

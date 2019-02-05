@@ -20,19 +20,22 @@
 
 package com.github.ydespreaux.spring.data.jpa;
 
-import org.springframework.core.convert.converter.Converter;
+import com.github.ydespreaux.testcontainers.mysql.MySQLContainer;
+import org.junit.ClassRule;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-/**
- * @param <D>
- * @param <T>
- * @author Yoann Despréaux
- * @since 0.0.3
- */
-public interface ModelConverter<D, T> extends Converter<D, T> {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+        ITAuthorRepositoryTest.class,
+        ITBookRepositoryTest.class
+})
+public class ITSuiteTest {
 
-    /**
-     * @param source
-     * @return
-     */
-    D convertToDTO(T source);
+    @ClassRule
+    public static final MySQLContainer mySqlContainer = new MySQLContainer()
+            .withUsername("user")
+            .withPassword("password");
+
+
 }

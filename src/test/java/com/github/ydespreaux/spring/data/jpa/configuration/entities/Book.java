@@ -25,10 +25,11 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 @Entity
 @Table(name = "book")
@@ -55,13 +56,16 @@ public class Book implements Serializable {
     private Genre genre;
     @Column(name = "price")
     private Double price;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    private Author author;
+
     @Column(name = "editor", length = 255)
     private String editor;
     @Column(name = "publication")
     private LocalDate publication;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Author author;
+
     @Version
     private Integer version;
 
@@ -69,30 +73,23 @@ public class Book implements Serializable {
         THRILLER, FANTASTIQUE, FICTION
     }
 
-    /**
-     * Properties path for search
-     */
-    public enum BookPropertyPath {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Book)) return false;
+        Book book = (Book) o;
+        return Objects.equals(getTitle(), book.getTitle()) &&
+                Objects.equals(getDescription(), book.getDescription()) &&
+                getGenre() == book.getGenre() &&
+                Objects.equals(getPrice(), book.getPrice()) &&
+                Objects.equals(getAuthor(), book.getAuthor()) &&
+                Objects.equals(getEditor(), book.getEditor()) &&
+                Objects.equals(getPublication(), book.getPublication());
+    }
 
-        TITLE("title"),
-        DESCRIPTION("description"),
-        GENRE("genre"),
-        PRICE("price"),
-        AUTHOR("author"),
-        AUTHOR_FIRSTNAME("author.firstName"),
-        AUTHOR_LASTNAME("author.lastName"),
-        EDITOR("editor"),
-        PUBLICATION("publication");
-
-        private final String propertyPath;
-
-        BookPropertyPath(String propertyPath) {
-            this.propertyPath = propertyPath;
-        }
-
-        public String getPropertyPath() {
-            return this.propertyPath;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitle(), getDescription(), getGenre(), getPrice(), getAuthor(), getEditor(), getPublication());
     }
 
 }

@@ -30,7 +30,7 @@ import java.util.Collection;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class JpaCriteriaRepositoryConfigExtension extends JpaRepositoryConfigExtension {
 

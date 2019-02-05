@@ -36,7 +36,7 @@ import javax.persistence.EntityManager;
  * @param <S>
  * @param <K>
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class JpaCriteriaRepositoryFactoryBean<T extends Repository<S, K>, S, K> extends JpaRepositoryFactoryBean<T, S, K> {
 

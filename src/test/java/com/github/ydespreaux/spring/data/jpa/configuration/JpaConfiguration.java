@@ -32,13 +32,12 @@ import org.springframework.context.annotation.Configuration;
  * Jpa configuration
  *
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 @Configuration
 @EnableAutoConfiguration
 @EntityScan(basePackages = {"com.github.ydespreaux.spring.data.jpa.configuration.entities", "org.springframework.data.jpa.convert.threeten"})
 @EnableJpaCriteriaRepositories(basePackages = {"com.github.ydespreaux.spring.data.jpa.configuration.repository"})
-//@EnableJpaRepositories(basePackages = {"com.github.ydespreaux.spring.data.jpa.configuration.repository"})
 public class JpaConfiguration {
 
 }

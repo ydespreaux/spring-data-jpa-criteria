@@ -24,21 +24,21 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.github.ydespreaux.spring.data.jpa.query.Criteria.CriteriaEntry;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class SpecificationCriteria<T> implements Specification<T> {
 
     private static final long serialVersionUID = 3295157927853086841L;
 
     private transient Criteria criteria;
+
+    private transient Map<String, Join<?, ?>> joinMap = new HashMap<>();
 
     public SpecificationCriteria(Criteria criteria) {
         this.criteria = criteria;
@@ -94,7 +94,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @return
      */
     protected Predicate toPredicate(CriteriaEntry entry, Root<T> root, CriteriaBuilder cb) {
-        Path<?> path = getPath(root, splitProperties(entry.getField().getName()));
+        Path<?> path = getPath(root, root.getJavaType().getSimpleName(), splitProperties(entry.getField().getName()));
         return toPredicate(cb, path, entry);
     }
 
@@ -104,14 +104,19 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param <Y>
      * @return
      */
-    protected <Y> Path<Y> getPath(From<T, ?> root, String... properties) {
+    protected <Y> Path<Y> getPath(From<T, ?> root, String currentPath, String... properties) {
         if (properties.length == 1) {
             return root.get(properties[0]);
         }
-        Join<T, ?> join = root.join(properties[0], JoinType.LEFT);
+        String path = currentPath + "." + properties[0];
+        Join<T, ?> join = (Join<T, ?>) joinMap.get(path);
+        if (join == null) {
+            join = root.join(properties[0], JoinType.LEFT);
+            joinMap.put(path, join);
+        }
         String[] newProperties = new String[properties.length - 1];
         System.arraycopy(properties, 1, newProperties, 0, newProperties.length);
-        return getPath(join, newProperties);
+        return getPath(join, path, newProperties);
     }
 
     /**

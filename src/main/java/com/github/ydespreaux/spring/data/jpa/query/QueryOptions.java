@@ -18,36 +18,45 @@
  * Please send bugreports with examples or suggestions to yoann.despreaux@believeit.fr
  */
 
-package com.github.ydespreaux.spring.data.jpa.configuration.entities;
+package com.github.ydespreaux.spring.data.jpa.query;
 
-import lombok.*;
+import lombok.Getter;
 
-import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.1.0
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@Builder
-public class BookDTO implements Serializable {
+public class QueryOptions {
+
+    public static final QueryOptions DEFAULT = new QueryOptions();
+    @Getter
+    private final Set<String> associations = new HashSet<>();
+    @Getter
+    private boolean distinct = false;
+
+    public QueryOptions distinct(boolean distinct) {
+        this.distinct = distinct;
+        return this;
+    }
+
+    public QueryOptions withAssociation(String association) {
+        this.associations.add(association);
+        return this;
+    }
+
+    public QueryOptions withAssociation(String... associations) {
+        this.associations.addAll(Arrays.asList(associations));
+        return this;
+    }
+
     /**
-     *
+     * @return
      */
-    private static final long serialVersionUID = 1L;
-
-    private Long id;
-    private String title;
-    private String description;
-    private Book.Genre genre;
-    private Double price;
-    private String author;
-    private String editor;
-    private LocalDate publication;
-
+    public boolean hasAssocations() {
+        return !this.associations.isEmpty();
+    }
 }

@@ -27,7 +27,7 @@ import java.lang.annotation.Annotation;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class JpaCriteriaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
     JpaCriteriaRepositoriesRegistrar() {

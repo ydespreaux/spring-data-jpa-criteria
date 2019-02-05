@@ -20,24 +20,24 @@
 
 package com.github.ydespreaux.spring.data.jpa.repository.support;
 
-import com.github.ydespreaux.spring.data.jpa.ModelConverter;
 import com.github.ydespreaux.spring.data.jpa.query.Criteria;
+import com.github.ydespreaux.spring.data.jpa.query.QueryOptions;
+import com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria;
 import org.hibernate.annotations.QueryHints;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.support.PageableExecutionUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.Subgraph;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -50,12 +50,11 @@ import static org.springframework.data.jpa.repository.query.QueryUtils.toOrders;
 /**
  * @param <T>
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends SimpleJpaRepository<T, K> implements JpaCriteriaRepository<T, K> {
 
     protected final EntityManager em;
-    private final JpaEntityInformation<T, ?> metadata;
 
     /**
      * @param entityInformation
@@ -64,7 +63,6 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
     public SimpleJpaCriteriaRepository(JpaEntityInformation<T, ?> entityInformation, final EntityManager em) {
         super(entityInformation, em);
         this.em = em;
-        this.metadata = entityInformation;
     }
 
     /**
@@ -76,18 +74,18 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
     }
 
     /**
+     *
      * @param query
      * @return
      */
-    private static Long executeCountQuery(TypedQuery<Long> query) {
-
+    private static long executeCountQuery(TypedQuery<Long> query) {
         Assert.notNull(query, "TypedQuery must not be null!");
-
         List<Long> totals = query.getResultList();
-        Long total = 0L;
+        long total = 0L;
 
-        for (Long element : totals) {
-            total += element == null ? 0 : element;
+        Long element;
+        for (Iterator var4 = totals.iterator(); var4.hasNext(); total += element == null ? 0L : element) {
+            element = (Long) var4.next();
         }
 
         return total;
@@ -98,8 +96,18 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      * @return
      */
     @Override
-    public Long count(Criteria criteria) {
-        return this.count(new com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria<>(criteria));
+    public long count(Criteria criteria, QueryOptions options) {
+        return executeCountQuery(this.getCountQuery(new SpecificationCriteria<>(criteria), this.getDomainClass(), options));
+    }
+
+    @Override
+    public Optional<T> findOne(Criteria criteria, QueryOptions options) {
+        try {
+            TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), Sort.unsorted(), options);
+            return Optional.of(query.getSingleResult());
+        } catch (NoResultException var3) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -107,8 +115,20 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      * @return
      */
     @Override
-    public List<T> findAll(Criteria criteria) {
-        return this.findAll(new com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria<>(criteria));
+    public List<T> findAll(Criteria criteria, QueryOptions options) {
+        return this.findAll(criteria, (Sort) null, options);
+    }
+
+    /**
+     *
+     * @param criteria
+     * @param sort
+     * @return
+     */
+    @Override
+    public List<T> findAll(Criteria criteria, Sort sort, QueryOptions options) {
+        TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), sort == null ? Sort.unsorted() : sort, options);
+        return query.getResultList();
     }
 
     /**
@@ -117,102 +137,133 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      * @return
      */
     @Override
-    public Page<T> findAll(Criteria criteria, Pageable pageable) {
-        return this.findAll(new com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria<>(criteria), pageable);
-    }
-
-    /**
-     * @param criteria
-     * @param converter
-     * @param fetchAssociation
-     * @return
-     */
-    @Override
-    public <D> List<D> findAll(Criteria criteria, ModelConverter<D, T> converter, String... fetchAssociation) {
-        Specification<T> spec = new com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria<>(criteria);
-        TypedQuery<T> query = getTypedQuery(spec, null, fetchAssociation);
-        return transformResult(query, converter);
-    }
-
-    /**
-     * @param criteria
-     * @param pageable
-     * @param converter
-     * @param fetchAssociation
-     * @return
-     */
-    @Override
-    public <D> Page<D> findAll(Criteria criteria, Pageable pageable, ModelConverter<D, T> converter, String... fetchAssociation) {
-        Specification<T> spec = new com.github.ydespreaux.spring.data.jpa.query.SpecificationCriteria<>(criteria);
-        TypedQuery<T> query = getTypedQuery(spec, pageable == null ? null : pageable.getSort(), fetchAssociation);
-        return pageable == null ? new PageImpl<>(transformResult(query, converter)) : this.readPage(query, spec, getDomainClass(), converter, pageable);
-    }
-
-    /**
-     * @param id
-     * @param converter
-     * @param fetchAssociation
-     * @param <D>
-     * @return
-     */
-    @Override
-    public <D> Optional<D> findById(K id, ModelConverter<D, T> converter, String... fetchAssociation) {
-        Specification<T> specification = (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> restrictions = new ArrayList<>();
-            Iterable<String> idAttributeNames = metadata.getIdAttributeNames();
-            if (!metadata.hasCompositeId()) {
-                restrictions.add(criteriaBuilder.equal(root.get((String) idAttributeNames.iterator().next()), id));
-            } else {
-                idAttributeNames.forEach(idAttributeName -> {
-                    Object idAttributeValue = metadata.getCompositeIdAttributeValue(id, idAttributeName);
-                    restrictions.add(criteriaBuilder.equal(root.get(idAttributeName), idAttributeValue));
-                });
-            }
-            return criteriaBuilder.and(restrictions.toArray(new Predicate[restrictions.size()]));
-        };
-        TypedQuery<T> query = getTypedQuery(specification, null, fetchAssociation);
-        return transformSingleResult(query, converter);
+    public Page<T> findAll(Criteria criteria, Pageable pageable, QueryOptions options) {
+        Specification<T> specification = new SpecificationCriteria<>(criteria);
+        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
+        TypedQuery<T> query = this.getTypedQuery(specification, sort, options);
+        return (Page) (pageable.isUnpaged() ? new PageImpl(query.getResultList()) : this.readPage(query, this.getDomainClass(), pageable, specification, options));
     }
 
     /**
      * @param spec
      * @param sort
-     * @param fetchAssociations
      * @return
      */
-    protected TypedQuery<T> getTypedQuery(Specification<T> spec, Sort sort, String... fetchAssociations) {
-        return this.getTypedQuery(spec, getDomainClass(), sort, fetchAssociations);
+    private TypedQuery<T> getTypedQuery(Specification<T> spec, Sort sort, QueryOptions options) {
+        return this.getTypedQuery(spec, getDomainClass(), sort, options);
     }
 
     /**
      * @param spec
      * @param domainClass
      * @param sort
-     * @param fetchAssociations
      * @return
      */
-    protected <S extends T> TypedQuery<S> getTypedQuery(Specification<S> spec, Class<S> domainClass, Sort sort, String... fetchAssociations) {
+    private <S extends T> TypedQuery<S> getTypedQuery(Specification<S> spec, Class<S> domainClass, Sort sort, QueryOptions options) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<S> criteriaQuery = builder.createQuery(domainClass);
         Root<S> root = applySpecification(spec, domainClass, criteriaQuery);
         criteriaQuery.select(root);
+        if (options.isDistinct()) {
+            criteriaQuery.distinct(true);
+        }
         if (sort != null) {
             criteriaQuery.orderBy(toOrders(sort, root, builder));
         }
-        TypedQuery<S> query = em.createQuery(criteriaQuery);
-        if (fetchAssociations != null && fetchAssociations.length > 0) {
-            query.setHint(QueryHints.LOADGRAPH, applyFetchAssociations(domainClass, fetchAssociations));
+        TypedQuery<S> query = this.applyMetadata(this.em.createQuery(criteriaQuery));
+        if (options.hasAssocations()) {
+            query.setHint(QueryHints.LOADGRAPH, applyFetchAssociations(domainClass, options.getAssociations()));
         }
         return query;
+
     }
 
     /**
+     *
+     * @param query
+     * @param <S>
+     * @return
+     */
+    private <S> TypedQuery<S> applyMetadata(TypedQuery<S> query) {
+        CrudMethodMetadata metadata = getRepositoryMethodMetadata();
+        if (metadata == null) {
+            return query;
+        } else {
+            LockModeType type = metadata.getLockModeType();
+            return type == null ? query : query.setLockMode(type);
+        }
+    }
+
+    /**
+     * @param spec
+     * @param domainClass
+     * @param query
+     * @param <S>
+     * @param <U>
+     * @return
+     */
+    private <S, U extends T> Root<U> applySpecification(Specification<U> spec, Class<U> domainClass, CriteriaQuery<S> query) {
+        Assert.notNull(domainClass, "Domain class must not be null!");
+        Assert.notNull(query, "CriteriaQuery must not be null!");
+        Root<U> root = query.from(domainClass);
+        if (spec == null) {
+            return root;
+        }
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        Predicate predicate = spec.toPredicate(root, query, builder);
+        if (predicate != null) {
+            query.where(predicate);
+        }
+        return root;
+    }
+
+    /**
+     *
+     * @param query
+     * @param domainClass
+     * @param pageable
+     * @param spec
+     * @param options
+     * @param <S>
+     * @return
+     */
+    private <S extends T> Page<S> readPage(TypedQuery<S> query, Class<S> domainClass, Pageable pageable, @Nullable Specification<S> spec, QueryOptions options) {
+        if (pageable.isPaged()) {
+            query.setFirstResult((int) pageable.getOffset());
+            query.setMaxResults(pageable.getPageSize());
+        }
+        return PageableExecutionUtils.getPage(query.getResultList(), pageable, () -> executeCountQuery(this.getCountQuery(spec, domainClass, options)));
+    }
+
+    /**
+     *
+     * @param spec
+     * @param domainClass
+     * @param options
+     * @param <S>
+     * @return
+     */
+    private <S extends T> TypedQuery<Long> getCountQuery(@Nullable Specification<S> spec, Class<S> domainClass, QueryOptions options) {
+        CriteriaBuilder builder = this.em.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<S> root = this.applySpecification(spec, domainClass, query);
+        if (options.isDistinct()) {
+            query.select(builder.countDistinct(root));
+        } else {
+            query.select(builder.count(root));
+        }
+        query.orderBy(Collections.emptyList());
+        return this.em.createQuery(query);
+    }
+
+    /**
+     *
      * @param domainClass
      * @param associations
      * @param <S>
      * @return
      */
-    private <S extends T> EntityGraph<S> applyFetchAssociations(Class<S> domainClass, String... associations) {
+    private <S extends T> EntityGraph<S> applyFetchAssociations(Class<S> domainClass, Set<String> associations) {
         final EntityGraph<S> fetchGraph = em.createEntityGraph(domainClass);
         Map<String, Subgraph<?>> joinMap = new HashMap<>();
         for (String association : associations) {
@@ -238,72 +289,6 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
             return;
         }
         applyFetchAssociation(joinMap, root, association.substring(fields[0].length() + 1), joinMap.get(path), path);
-    }
-
-    /**
-     * Reads the given {@link TypedQuery} into a {@link Page} applying the given {@link Pageable} and
-     * {@link Specification}.
-     *
-     * @param query    must not be {@literal null}.
-     * @param spec     can be {@literal null}.
-     * @param pageable can be {@literal null}.
-     * @return
-     */
-    protected <S extends T, D> Page<D> readPage(TypedQuery<S> query, final Specification<S> spec, final Class<S> domainClass, ModelConverter<D, S> converter, Pageable pageable) {
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-        return PageableExecutionUtils.getPage(transformResult(query, converter), pageable, () -> executeCountQuery(getCountQuery(spec, domainClass)));
-    }
-
-    /**
-     * @param spec
-     * @param domainClass
-     * @param query
-     * @param <S>
-     * @param <U>
-     * @return
-     */
-    private <S, U extends T> Root<U> applySpecification(Specification<U> spec, Class<U> domainClass,
-                                                        CriteriaQuery<S> query) {
-        Assert.notNull(domainClass, "Domain class must not be null!");
-        Assert.notNull(query, "CriteriaQuery must not be null!");
-        Root<U> root = query.from(domainClass);
-        if (spec == null) {
-            return root;
-        }
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        Predicate predicate = spec.toPredicate(root, query, builder);
-        if (predicate != null) {
-            query.where(predicate);
-        }
-        return root;
-    }
-
-    /**
-     * @param query
-     * @param converter
-     * @return
-     */
-    protected <S extends T, D> List<D> transformResult(TypedQuery<S> query, ModelConverter<D, S> converter) {
-        final List<D> transformers = new ArrayList<>();
-        final List<S> entities = query.getResultList();
-        entities.forEach(entity -> transformers.add(converter.convertToDTO(entity)));
-        return transformers;
-    }
-
-    /**
-     * @param query
-     * @param converter
-     * @param <S>
-     * @param <D>
-     * @return
-     */
-    protected <S extends T, D> Optional<D> transformSingleResult(TypedQuery<S> query, ModelConverter<D, S> converter) {
-        final List<S> entities = query.getResultList();
-        if (entities.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(converter.convertToDTO(entities.get(0)));
     }
 
 }
