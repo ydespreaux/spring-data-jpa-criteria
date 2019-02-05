@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2018 Yoann Despréaux
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program eq free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program eq distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -40,7 +40,7 @@ public class CriteriaTest {
 
     @Test
     public void isNotCriteria() {
-        Criteria criteria = new Criteria("field").isNot("value");
+        Criteria criteria = new Criteria("field").notEq("value");
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -53,7 +53,7 @@ public class CriteriaTest {
 
     @Test
     public void isCriteria() {
-        Criteria criteria = new Criteria("field").is("value");
+        Criteria criteria = new Criteria("field").eq("value");
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -226,7 +226,7 @@ public class CriteriaTest {
 
     @Test
     public void simpleCriteria() {
-        Criteria criteria = new Criteria("field").is("value");
+        Criteria criteria = new Criteria("field").eq("value");
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
         List<Criteria.CriteriaEntry> entries = criteria.getQueryCriteriaEntries();
         assertThat(entries.size(), is(equalTo(1)));
@@ -237,8 +237,8 @@ public class CriteriaTest {
 
     @Test
     public void multiAndConjunctionCriteria() {
-        Criteria criteria = new Criteria("field_1").is("value_1")
-                .and("field_2").isNot("value_2")
+        Criteria criteria = new Criteria("field_1").eq("value_1")
+                .and("field_2").notEq("value_2")
                 .and("field_3").contains("value_3");
 
         assertThat(criteria.isAnd(), is(true));
@@ -261,8 +261,8 @@ public class CriteriaTest {
 
     @Test
     public void multiOrConjunctionCriteria() {
-        Criteria criteria = new Criteria("field_1").is("value_1")
-                .or("field_2").isNot("value_2")
+        Criteria criteria = new Criteria("field_1").eq("value_1")
+                .or("field_2").notEq("value_2")
                 .or("field_3").contains("value_3");
 
         assertThat(criteria.isAnd(), is(false));
@@ -288,8 +288,8 @@ public class CriteriaTest {
 
     @Test
     public void combinedCriteria_0() {
-        Criteria criteria = new Criteria("attribut1").is("value1")
-                .or(new Criteria("attribut_2").isNot("value2").and("attribut_3").contains("value3"));
+        Criteria criteria = new Criteria("attribut1").eq("value1")
+                .or(new Criteria("attribut_2").notEq("value2").and("attribut_3").contains("value3"));
 
         assertThat(criteria.getField().getName(), is(equalTo("attribut_3")));
         assertThat(criteria.isOr(), is(true));
@@ -323,9 +323,9 @@ public class CriteriaTest {
 
     @Test
     public void combinedCriteria_1() {
-        Criteria criteria = new Criteria("field_1").is("value_1")
-                .or("field_2").is("value_2")
-                .and("field_3").is("value_3");
+        Criteria criteria = new Criteria("field_1").eq("value_1")
+                .or("field_2").eq("value_2")
+                .and("field_3").eq("value_3");
 
         assertThat(criteria.getField().getName(), is(equalTo("field_3")));
         assertThat(criteria.isAnd(), is(true));

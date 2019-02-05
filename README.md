@@ -10,7 +10,7 @@ Spring Data JPA with criteria implementation
 |:----------------------------:|:----------------:|
 |           1.1.0              |   2.1.0.RELEASE  |
 
-## Maven dependency
+## Add maven dependency
 
 ```xml
 <dependency>
@@ -22,7 +22,7 @@ Spring Data JPA with criteria implementation
 
 ## Quick Start
 
-
+### Add SpringBoot application
 
 ```java
 @SpringBootApplication
@@ -33,6 +33,10 @@ public class SampleJpaCriteriaApplication {
     }
 }
 ```
+
+### Add domains
+
+#### Artist model
 
 ```java
 @Getter
@@ -56,6 +60,8 @@ public class Artist {
     private Set<Album> albums;
 }
 ```
+
+#### Album model
 
 ```java
 @Getter
@@ -87,6 +93,8 @@ public class Album {
 }
 ```
 
+#### Song model
+
 ```java
 @Getter
 @Setter
@@ -117,6 +125,7 @@ public class Song {
 }
 ```
 
+### Add repositories
 
 ```java
 public interface ArtistRepository extends JpaCriteriaRepository<Artist, Integer> {
@@ -133,6 +142,8 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
 }
 ```
 
+### Add configuration
+
 ```java
 @Configuration
 @EnableAutoConfiguration
@@ -142,5 +153,65 @@ public class JpaConfiguration {
 }
 ```
 
+### Add a rest controller for tests
+
 ```java
+@RestController
+@RequestMapping("/api/songs")
+public class SongRestController {
+
+    @Autowired
+    private SongRepository repository;
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<SongDetail>> findSongByQuery(
+            @RequestParam(required = false, value = "artist") String artist,
+            @RequestParam(required = false, value = "year") Integer year,
+            @RequestParam(required = false, value = "title") String title) {
+
+        Criteria criteria = new Criteria();
+        if (StringUtils.hasText(artist)) {
+            criteria = criteria.and("album.artist.displayName").contains(artist);
+        }
+        if (StringUtils.hasText(title)) {
+            criteria = criteria.and("title").contains(title);
+        }
+        if (year != null) {
+            criteria = criteria.and("album.year").eq(year);
+        }
+        return ResponseEntity.ok(this.repository.findAll(criteria, new QueryOptions().withAssociation("album", "album.artist"))
+                .stream()
+                .map(this::generateDetail)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     *
+     * @param song
+     * @return
+     */
+    private SongDetail generateDetail(Song song) {
+        return SongDetail.builder()
+                .id(song.getId())
+                .artist(song.getAlbum().getArtist().getDisplayName())
+                .album(song.getAlbum().getTitle())
+                .year(song.getAlbum().getYear())
+                .track(song.getTrack())
+                .title(song.getTitle())
+                .build();
+    }
+
+    @Data
+    @Builder
+    private static class SongDetail {
+        private Integer id;
+        private String artist;
+        private String album;
+        private Integer year;
+        private Integer track;
+        private String title;
+    }
+}
 ```
+
+
