@@ -21,6 +21,7 @@
 package com.github.ydespreaux.spring.data.jpa.configuration.entities;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -37,7 +38,6 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Book implements Serializable {
     /**
@@ -45,7 +45,11 @@ public class Book implements Serializable {
      */
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(
+            name = "native",
+            strategy = "native"
+    )
     private Long id;
     @Column(name = "title", length = 100, nullable = false, unique = true)
     private String title;
@@ -57,14 +61,16 @@ public class Book implements Serializable {
     @Column(name = "price")
     private Double price;
 
-    @Column(name = "editor", length = 255)
-    private String editor;
     @Column(name = "publication")
     private LocalDate publication;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private Author author;
+
+    @ManyToOne
+    @JoinColumn(name = "EDITOR_ID", nullable = true)
+    private Editor editor;
 
     @Version
     private Integer version;

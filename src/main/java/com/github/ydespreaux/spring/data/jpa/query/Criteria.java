@@ -46,6 +46,12 @@ public class Criteria {
     private List<CriteriaEntry> queryCriteria = new ArrayList<>(1);
 
     /**
+     *
+     */
+    public Criteria() {
+    }
+
+    /**
      * Creates a new Criteria with provided field name
      *
      * @param fieldName

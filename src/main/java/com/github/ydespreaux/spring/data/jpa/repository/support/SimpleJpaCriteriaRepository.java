@@ -267,28 +267,33 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
         final EntityGraph<S> fetchGraph = em.createEntityGraph(domainClass);
         Map<String, Subgraph<?>> joinMap = new HashMap<>();
         for (String association : associations) {
-            applyFetchAssociation(joinMap, fetchGraph, association, null, new StringBuilder());
+            String[] fields = association.split("\\.");
+            applyFetchAssociation(fetchGraph, fields, joinMap);
         }
         return fetchGraph;
     }
 
     /**
+     *
      * @param joinMap
      * @param root
-     * @param association
-     * @param currentSubGraph
-     * @param path
+     * @param fields
      */
-    private void applyFetchAssociation(Map<String, Subgraph<?>> joinMap, EntityGraph<?> root, String association, Subgraph<?> currentSubGraph, StringBuilder path) {
-        String[] fields = association.split("\\.");
-        path.append(path.length() == 0 ? "" : ".").append(fields[0]);
-        if (!joinMap.containsKey(path)) {
-            joinMap.put(path.toString(), currentSubGraph != null ? currentSubGraph.addSubgraph(fields[0]) : root.addSubgraph(fields[0]));
+    private void applyFetchAssociation(EntityGraph<?> root, String[] fields, Map<String, Subgraph<?>> joinMap) {
+        StringBuilder path = new StringBuilder();
+        Subgraph<?> currentSubGraph = null;
+        for (int i = 0; i < fields.length; i++) {
+            String attribut = fields[i];
+            if (path.length() > 0) {
+                path.append(".");
+            }
+            path.append(attribut);
+            String keyGraph = path.toString();
+            if (!joinMap.containsKey(keyGraph)) {
+                joinMap.put(keyGraph, currentSubGraph != null ? currentSubGraph.addSubgraph(attribut) : root.addSubgraph(attribut));
+            }
+            currentSubGraph = joinMap.get(keyGraph);
         }
-        if (fields.length == 1) {
-            return;
-        }
-        applyFetchAssociation(joinMap, root, association.substring(fields[0].length() + 1), joinMap.get(path), path);
     }
 
 }
