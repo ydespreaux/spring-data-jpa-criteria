@@ -41,6 +41,8 @@ public class CriteriaTest {
     @Test
     public void isNotCriteria() {
         Criteria criteria = new Criteria("field").notEq("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -54,6 +56,8 @@ public class CriteriaTest {
     @Test
     public void isCriteria() {
         Criteria criteria = new Criteria("field").eq("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -67,6 +71,8 @@ public class CriteriaTest {
     @Test
     public void betweenCriteria() {
         Criteria criteria = new Criteria("field").between("value1", "value2");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -80,6 +86,8 @@ public class CriteriaTest {
     @Test
     public void containsCriteria() {
         Criteria criteria = new Criteria("field").contains("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -93,6 +101,8 @@ public class CriteriaTest {
     @Test
     public void endsWithCriteria() {
         Criteria criteria = new Criteria("field").endsWith("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -106,6 +116,8 @@ public class CriteriaTest {
     @Test
     public void startsWithCriteria() {
         Criteria criteria = new Criteria("field").startsWith("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -119,6 +131,8 @@ public class CriteriaTest {
     @Test
     public void greaterThanCriteria() {
         Criteria criteria = new Criteria("field").greaterThan(10);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -132,6 +146,8 @@ public class CriteriaTest {
     @Test
     public void greaterThanEqualCriteria() {
         Criteria criteria = new Criteria("field").greaterThanEqual(10);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -145,6 +161,8 @@ public class CriteriaTest {
     @Test
     public void lessThanCriteria() {
         Criteria criteria = new Criteria("field").lessThan(10);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -158,6 +176,8 @@ public class CriteriaTest {
     @Test
     public void lessThanEqualCriteria() {
         Criteria criteria = new Criteria("field").lessThanEqual(10);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -171,6 +191,8 @@ public class CriteriaTest {
     @Test
     public void inCriteriaWithObjects() {
         Criteria criteria = new Criteria("field").in("value1", "value2");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -186,6 +208,8 @@ public class CriteriaTest {
     public void inCriteriaWithIterable() {
         Iterable<String> values = Arrays.asList("value1", "value2");
         Criteria criteria = new Criteria("field").in(values);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -199,6 +223,8 @@ public class CriteriaTest {
     @Test
     public void notInCriteriaWithObjects() {
         Criteria criteria = new Criteria("field").notIn("value1", "value2");
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -214,6 +240,8 @@ public class CriteriaTest {
     public void notInCriteriaWithIterable() {
         Iterable<String> values = Arrays.asList("value1", "value2");
         Criteria criteria = new Criteria("field").notIn(values);
+        System.out.println(criteria);
+
         assertThat(criteria.getField().getName(), is(equalTo("field")));
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
@@ -227,6 +255,8 @@ public class CriteriaTest {
     @Test
     public void simpleCriteria() {
         Criteria criteria = new Criteria("field").eq("value");
+        System.out.println(criteria);
+
         assertThat(criteria.getCriteriaChain().isEmpty(), is(true));
         List<Criteria.CriteriaEntry> entries = criteria.getQueryCriteriaEntries();
         assertThat(entries.size(), is(equalTo(1)));
@@ -240,6 +270,7 @@ public class CriteriaTest {
         Criteria criteria = new Criteria("field_1").eq("value_1")
                 .and("field_2").notEq("value_2")
                 .and("field_3").contains("value_3");
+        System.out.println(criteria);
 
         assertThat(criteria.isAnd(), is(true));
         assertThat(criteria.isOr(), is(false));
@@ -264,6 +295,7 @@ public class CriteriaTest {
         Criteria criteria = new Criteria("field_1").eq("value_1")
                 .or("field_2").notEq("value_2")
                 .or("field_3").contains("value_3");
+        System.out.println(criteria);
 
         assertThat(criteria.isAnd(), is(false));
         assertThat(criteria.isOr(), is(true));
@@ -290,6 +322,7 @@ public class CriteriaTest {
     public void combinedCriteria_0() {
         Criteria criteria = new Criteria("attribut1").eq("value1")
                 .or(new Criteria("attribut_2").notEq("value2").and("attribut_3").contains("value3"));
+        System.out.println(criteria);
 
         assertThat(criteria.getField().getName(), is(equalTo("attribut_3")));
         assertThat(criteria.isOr(), is(true));
@@ -326,6 +359,7 @@ public class CriteriaTest {
         Criteria criteria = new Criteria("field_1").eq("value_1")
                 .or("field_2").eq("value_2")
                 .and("field_3").eq("value_3");
+        System.out.println(criteria);
 
         assertThat(criteria.getField().getName(), is(equalTo("field_3")));
         assertThat(criteria.isAnd(), is(true));

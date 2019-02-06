@@ -34,8 +34,21 @@ public class ITSuiteTest {
 
     @ClassRule
     public static final MySQLContainer mySqlContainer = new MySQLContainer()
+            .withDatabaseName("db_library")
             .withUsername("user")
-            .withPassword("password");
-
-
+            .withPassword("password")
+            .withSqlScriptDirectory("scripts");
+    public static String editorPocket = "Pocket";
+    public static String editorGallimard = "Gallimard";
+    public static String editorBelfond = "Belfond";
+    public static String editorDelcourt = "Delcourt";
+    public static String nicolasBeuglet = "Beuglet";
+    public static String elenaFerrante = "Ferrante";
+    public static String harlanCoben = "Coben";
+    public static String amieProdigieuse = "L'amie Prodigieuse - Tome 3 : Celle qui fuit et celle qui reste";
+    public static String complot = "Complot";
+    public static String leCri = "Le cri";
+    public static String sansDefense = "Sans defense";
+    public static String walkingDead28 = "Walking Dead - Tome 28 : Walking Dead";
+    public static String walkingDead29 = "Walking Dead - Tome 29 : La Ligne blanche";
 }

@@ -5,5 +5,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
-
+      ddl-auto: none
+logging:
+  level:
+    org.hibernate.type: TRACE

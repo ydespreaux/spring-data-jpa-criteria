@@ -22,12 +22,13 @@ package com.github.ydespreaux.spring.data.jpa;
 
 import com.github.ydespreaux.spring.data.jpa.configuration.JpaConfiguration;
 import com.github.ydespreaux.spring.data.jpa.configuration.entities.Author;
+import com.github.ydespreaux.spring.data.jpa.configuration.repository.AuthorRepository;
 import com.github.ydespreaux.spring.data.jpa.query.Criteria;
 import com.github.ydespreaux.spring.data.jpa.query.QueryOptions;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,60 +39,58 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = JpaConfiguration.class)
-public class ITAuthorRepositoryTest extends AbstractJpaCriteriaRepositoryTest {
+public class ITAuthorRepositoryTest {
 
-    @Before
-    public void onSetup() {
-        cleanData();
-        insertData();
-    }
+    @Autowired
+    protected AuthorRepository authorRepository;
 
     @Test
     public void countByBookDescription() {
-        long count = this.authorRepository.count(new Criteria("books.description").contains("Norvège"));
+        long count = this.authorRepository.count(new Criteria("books.description").contains("Norvege"));
         Assert.assertThat(count, is(equalTo(2L)));
     }
 
     @Test
     public void findAllByBookDescription() {
-        List<Author> authors = this.authorRepository.findAll(new Criteria("books.description").contains("Norvège"));
-        Assert.assertThat(authors.size(), is(equalTo(2)));
-        assertThat(authors.get(0), this.nicolasBeuglet);
-        assertThat(authors.get(1), this.nicolasBeuglet);
+        List<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvege"));
+        Assert.assertThat(result.size(), is(equalTo(2)));
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
     }
 
     @Test
     public void findAllByBookDescriptionWithPageable() {
-        Page<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvège"), createPageable(0, 5));
+        Page<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvege"), createPageable(0, 5));
         Assert.assertThat(result.getTotalElements(), is(equalTo(2L)));
-        assertThat(result.getContent().get(0), this.nicolasBeuglet);
-        assertThat(result.getContent().get(1), this.nicolasBeuglet);
+        Assert.assertThat(result.getContent().get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.getContent().get(1).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
     }
 
     @Test
     public void countByBookDescriptionWithDistinct() {
-        long count = this.authorRepository.count(new Criteria("books.description").contains("Norvège"), new QueryOptions().distinct(true));
+        long count = this.authorRepository.count(new Criteria("books.description").contains("Norvege"), new QueryOptions().distinct(true));
         Assert.assertThat(count, is(equalTo(1L)));
     }
 
     @Test
     public void findAllByBookTitleWithDistinct() {
-        List<Author> authors = this.authorRepository.findAll(new Criteria("books.description").contains("Norvège"), new QueryOptions().distinct(true));
-        Assert.assertThat(authors.size(), is(equalTo(1)));
-        assertThat(authors.get(0), this.nicolasBeuglet);
+        List<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvege"), new QueryOptions().distinct(true));
+        Assert.assertThat(result.size(), is(equalTo(1)));
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
     }
 
     @Test
     public void findAllByBookDescriptionWithDistinctAndPageable() {
-        Page<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvège"), createPageable(0, 5), new QueryOptions().distinct(true));
+        Page<Author> result = this.authorRepository.findAll(new Criteria("books.description").contains("Norvege"), createPageable(0, 5), new QueryOptions().distinct(true));
         Assert.assertThat(result.getTotalElements(), is(equalTo(1L)));
-        assertThat(result.getContent().get(0), this.nicolasBeuglet);
+        Assert.assertThat(result.getContent().get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
     }
 
     @Test
@@ -99,9 +98,10 @@ public class ITAuthorRepositoryTest extends AbstractJpaCriteriaRepositoryTest {
     public void findAllWithAssociation() {
         List<Author> result = this.authorRepository.findAll(null, new QueryOptions().withAssociation("books"));
         Assert.assertThat(result.size(), is(equalTo(3)));
-        Assert.assertThat(result.contains(this.elenaFerrante), is(true));
-        Assert.assertThat(result.contains(this.harlanCoben), is(true));
-        Assert.assertThat(result.contains(this.nicolasBeuglet), is(true));
+        List<String> lastNames = result.stream().map(Author::getLastName).collect(Collectors.toList());
+        Assert.assertThat(lastNames.contains(ITSuiteTest.elenaFerrante), is(true));
+        Assert.assertThat(lastNames.contains(ITSuiteTest.harlanCoben), is(true));
+        Assert.assertThat(lastNames.contains(ITSuiteTest.nicolasBeuglet), is(true));
     }
 
     @Test
@@ -109,9 +109,9 @@ public class ITAuthorRepositoryTest extends AbstractJpaCriteriaRepositoryTest {
     public void findAllWithAssociationAndSort() {
         List<Author> result = this.authorRepository.findAll(null, Sort.by(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books"));
         Assert.assertThat(result.size(), is(equalTo(3)));
-        assertThat(result.get(0), this.nicolasBeuglet);
-        assertThat(result.get(1), this.harlanCoben);
-        assertThat(result.get(2), this.elenaFerrante);
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
+        Assert.assertThat(result.get(2).getLastName(), is(equalTo(ITSuiteTest.elenaFerrante)));
     }
 
     @Test
@@ -119,25 +119,15 @@ public class ITAuthorRepositoryTest extends AbstractJpaCriteriaRepositoryTest {
     public void findAllWithAllAssociationAndSort() {
         List<Author> result = this.authorRepository.findAll(null, Sort.by(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books", "books.editor"));
         Assert.assertThat(result.size(), is(equalTo(3)));
-        assertThat(result.get(0), this.nicolasBeuglet);
-        assertThat(result.get(1), this.harlanCoben);
-        assertThat(result.get(2), this.elenaFerrante);
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
+        Assert.assertThat(result.get(2).getLastName(), is(equalTo(ITSuiteTest.elenaFerrante)));
     }
 
     @Test
     public void countWithAssociation() {
         Long count = this.authorRepository.count(null, new QueryOptions().withAssociation("books"));
         Assert.assertThat(count, is(equalTo(3L)));
-    }
-
-    /**
-     * @param actual
-     * @param expected
-     */
-    private void assertThat(Author actual, Author expected) {
-        Assert.assertThat(expected.getFirstName(), is(equalTo(actual.getFirstName())));
-        Assert.assertThat(expected.getLastName(), is(equalTo(actual.getLastName())));
-        Assert.assertThat(expected.getId(), is(equalTo(actual.getId())));
     }
 
     /**

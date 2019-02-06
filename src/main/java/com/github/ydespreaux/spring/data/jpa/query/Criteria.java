@@ -443,6 +443,28 @@ public class Criteria {
     }
 
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        if (!criteriaChained.isEmpty()) {
+            criteriaChained.forEach(criteria -> {
+                if (builder.length() > 0) {
+                    builder.append(" ").append(this.conjunctionOperator).append(" ");
+                }
+                builder.append("(").append(criteria.toString()).append(")");
+            });
+        }
+        if (!queryCriteria.isEmpty()) {
+            queryCriteria.forEach(criteria -> {
+                if (builder.length() > 0) {
+                    builder.append(" ").append(this.conjunctionOperator).append(" ");
+                }
+                builder.append("(").append(criteria.toString()).append(")");
+            });
+        }
+        return builder.toString();
+    }
+
     /**
      *
      */
@@ -462,11 +484,7 @@ public class Criteria {
 
         @Override
         public String toString() {
-            return "CriteriaEntry{" +
-                    "field=" + field.getName() +
-                    ", key=" + key +
-                    ", value=" + value +
-                    '}';
+            return field.getName() + " " + key + " " + value;
         }
     }
 
