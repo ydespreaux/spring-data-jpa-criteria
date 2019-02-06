@@ -484,7 +484,10 @@ public class Criteria {
 
         @Override
         public String toString() {
-            return field.getName() + " " + key + " " + value;
+            if (key == OperationKey.BETWEEN) {
+                return field.getName() + " " + key + " " + ((Object[]) value)[0] + " to " + ((Object[]) value)[1];
+            }
+            return field.getName() + " " + key + (value == null ? "" : " " + value);
         }
     }
 

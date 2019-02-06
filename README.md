@@ -24,7 +24,7 @@ This library defines a repository for performing dynamic queries using a criteri
 
 ## API Criteria
 
-### Constructors
+##### Constructors
 
 ```java
 public Criteria();
@@ -32,7 +32,7 @@ public Criteria(String fieldName);
 public Criteria(Field field);
 ```
 
-### Conjunctions
+##### Conjunctions
 
 ```java
 public Criteria and(Field field);
@@ -44,7 +44,7 @@ public Criteria or(Field field);
 public Criteria or(Criteria criteria);
 ```
 
-### Operators
+##### Operators
 
 ```java
 public Criteria eq(Object value);
@@ -141,28 +141,31 @@ Criteria criteria = new Criteria("field_1").eq("value_1")
 
 ## JpaCriteriaRepository repository
 
+The JpaCriteriaRepository interface implements search methods that take into account the criteria API.
 
 ```java
-public interface JpaCriteriaExecutor<T> {
+public interface JpaCriteriaRepository<T, ID> extends JpaRepository<T, ID> {
     Optional<T> findOne(@Nullable Criteria criteria);
     Optional<T> findOne(@Nullable Criteria criteria, QueryOptions options);
     List<T> findAll(@Nullable Criteria criteria);
     List<T> findAll(@Nullable Criteria criteria, QueryOptions options);
-    Page<T> findAll(@Nullable Criteria criteria, Pageable pageable);
-    Page<T> findAll(@Nullable Criteria criteria, Pageable pageable, QueryOptions options);
     List<T> findAll(@Nullable Criteria criteria, Sort sort);
     List<T> findAll(@Nullable Criteria criteria, Sort sort, QueryOptions options);
+    Page<T> findAll(@Nullable Criteria criteria, Pageable pageable);
+    Page<T> findAll(@Nullable Criteria criteria, Pageable pageable, QueryOptions options);
     long count(@Nullable Criteria criteria);
     long count(@Nullable Criteria criteria, QueryOptions options);
 }
 ```
+
+Sample:
 
 ```java
 public interface AuthorRepository extends JpaCriteriaRepository<Author, Long> {
 }
 ```
 
-## Add configuration
+## Spring Boot configuration
 
 ```java
 @Configuration
