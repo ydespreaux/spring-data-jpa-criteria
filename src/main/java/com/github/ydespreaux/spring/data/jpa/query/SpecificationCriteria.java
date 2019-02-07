@@ -38,8 +38,6 @@ public class SpecificationCriteria<T> implements Specification<T> {
 
     private transient Criteria criteria;
 
-    private transient Map<String, Join<?, ?>> joinMap = new HashMap<>();
-
     public SpecificationCriteria(Criteria criteria) {
         this.criteria = criteria;
     }
@@ -49,7 +47,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
         if (this.criteria == null) {
             return null;
         }
-        return toPredicate(this.criteria, root, cb);
+        return toPredicate(new HashMap<>(), this.criteria, root, cb);
     }
 
     /**
@@ -58,17 +56,17 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param cb
      * @return
      */
-    protected Predicate toPredicate(Criteria criteria, Root<T> root, CriteriaBuilder cb) {
+    private Predicate toPredicate(Map<String, Join<?, ?>> joinMap, Criteria criteria, Root<T> root, CriteriaBuilder cb) {
         List<Predicate> restrictions = new ArrayList<>();
         for (Criteria chainedCriteria : criteria.getCriteriaChain()) {
-            Predicate predicate = toPredicate(chainedCriteria, root, cb);
+            Predicate predicate = toPredicate(joinMap, chainedCriteria, root, cb);
             if (predicate != null) {
                 restrictions.add(predicate);
             }
         }
         List<CriteriaEntry> entries = criteria.getQueryCriteriaEntries();
         for (CriteriaEntry entry : entries) {
-            Predicate predicate = toPredicate(entry, root, cb);
+            Predicate predicate = toPredicate(joinMap, entry, root, cb);
             if (predicate != null) {
                 restrictions.add(predicate);
             }
@@ -93,8 +91,8 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param cb
      * @return
      */
-    protected Predicate toPredicate(CriteriaEntry entry, Root<T> root, CriteriaBuilder cb) {
-        Path<?> path = getPath(root, root.getJavaType().getSimpleName(), splitProperties(entry.getField().getName()));
+    private Predicate toPredicate(Map<String, Join<?, ?>> joinMap, CriteriaEntry entry, Root<T> root, CriteriaBuilder cb) {
+        Path<?> path = getPath(joinMap, root, root.getJavaType().getSimpleName(), splitProperties(entry.getField().getName()));
         return toPredicate(cb, path, entry);
     }
 
@@ -104,7 +102,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param <Y>
      * @return
      */
-    protected <Y> Path<Y> getPath(From<T, ?> root, String currentPath, String... properties) {
+    private <Y> Path<Y> getPath(Map<String, Join<?, ?>> joinMap, From<T, ?> root, String currentPath, String... properties) {
         if (properties.length == 1) {
             return root.get(properties[0]);
         }
@@ -116,7 +114,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
         }
         String[] newProperties = new String[properties.length - 1];
         System.arraycopy(properties, 1, newProperties, 0, newProperties.length);
-        return getPath(join, path, newProperties);
+        return getPath(joinMap, join, path, newProperties);
     }
 
     /**
