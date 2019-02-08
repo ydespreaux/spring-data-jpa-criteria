@@ -97,6 +97,17 @@ public class ITAuthorRepositoryTest {
     @Transactional(propagation = Propagation.NEVER)
     public void findAllWithAssociation() {
         List<Author> result = this.authorRepository.findAll(null, new QueryOptions().withAssociation("books"));
+        Assert.assertThat(result.size(), is(equalTo(4)));
+        List<String> lastNames = result.stream().map(Author::getLastName).collect(Collectors.toList());
+        Assert.assertThat(lastNames.contains(ITSuiteTest.elenaFerrante), is(true));
+        Assert.assertThat(lastNames.contains(ITSuiteTest.harlanCoben), is(true));
+        Assert.assertThat(lastNames.contains(ITSuiteTest.nicolasBeuglet), is(true));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void findAllWithAssociationAndDistinct() {
+        List<Author> result = this.authorRepository.findAll(null, new QueryOptions().withAssociation("books").distinct(true));
         Assert.assertThat(result.size(), is(equalTo(3)));
         List<String> lastNames = result.stream().map(Author::getLastName).collect(Collectors.toList());
         Assert.assertThat(lastNames.contains(ITSuiteTest.elenaFerrante), is(true));
@@ -108,6 +119,17 @@ public class ITAuthorRepositoryTest {
     @Transactional(propagation = Propagation.NEVER)
     public void findAllWithAssociationAndSort() {
         List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books"));
+        Assert.assertThat(result.size(), is(equalTo(4)));
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(2).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
+        Assert.assertThat(result.get(3).getLastName(), is(equalTo(ITSuiteTest.elenaFerrante)));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void findAllWithAssociationAndSortAndDistinct() {
+        List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books").distinct(true));
         Assert.assertThat(result.size(), is(equalTo(3)));
         Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
         Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
@@ -118,6 +140,17 @@ public class ITAuthorRepositoryTest {
     @Transactional(propagation = Propagation.NEVER)
     public void findAllWithAllAssociationAndSort() {
         List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books", "books.editor"));
+        Assert.assertThat(result.size(), is(equalTo(4)));
+        Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
+        Assert.assertThat(result.get(2).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
+        Assert.assertThat(result.get(3).getLastName(), is(equalTo(ITSuiteTest.elenaFerrante)));
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void findAllWithAllAssociationAndSortAndDistinct() {
+        List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books", "books.editor").distinct(true));
         Assert.assertThat(result.size(), is(equalTo(3)));
         Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
         Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));

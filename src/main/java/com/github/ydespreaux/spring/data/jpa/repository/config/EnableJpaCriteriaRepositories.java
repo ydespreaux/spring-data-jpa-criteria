@@ -21,9 +21,9 @@
 package com.github.ydespreaux.spring.data.jpa.repository.config;
 
 import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepositoryFactoryBean;
+import com.github.ydespreaux.spring.data.jpa.repository.support.SimpleJpaCriteriaRepository;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 
 import java.lang.annotation.*;
@@ -56,7 +56,7 @@ public @interface EnableJpaCriteriaRepositories {
 
     Class<?> repositoryFactoryBeanClass() default JpaCriteriaRepositoryFactoryBean.class;
 
-    Class<?> repositoryBaseClass() default DefaultRepositoryBaseClass.class;
+    Class<?> repositoryBaseClass() default SimpleJpaCriteriaRepository.class;
 
     String entityManagerFactoryRef() default "entityManagerFactory";
 
