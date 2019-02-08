@@ -24,6 +24,7 @@ import com.github.ydespreaux.testcontainers.mysql.MySQLContainer;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -33,11 +34,13 @@ import org.junit.runners.Suite;
 public class ITSuiteTest {
 
     @ClassRule
-    public static final MySQLContainer mySqlContainer = new MySQLContainer()
+    public static final JdbcDatabaseContainer mySqlContainer = new MySQLContainer()
             .withDatabaseName("db_library")
             .withUsername("user")
             .withPassword("password")
-            .withSqlScriptDirectory("scripts");
+            .withSqlScriptDirectory("scripts")
+            .withStartupTimeoutSeconds(240);
+
     public static String editorPocket = "Pocket";
     public static String editorGallimard = "Gallimard";
     public static String editorBelfond = "Belfond";
