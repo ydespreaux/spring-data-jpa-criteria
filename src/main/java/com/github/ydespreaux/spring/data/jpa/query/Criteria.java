@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2018 Yoann Despréaux
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program eq free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program eq distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,11 +28,11 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 /**
- * Criteria is the central class when constructing jpa queries. It follows more or less a fluent API style, which allows to
+ * Criteria eq the central class when constructing jpa queries. It follows more or less a fluent API style, which allows to
  * easily chain together multiple criteria.
  *
  * @author Yoann Despréaux
- * @since 0.1.0
+ * @since 1.0.0
  */
 public class Criteria {
 
@@ -44,6 +44,12 @@ public class Criteria {
     private String conjunctionOperator;
     private List<Criteria> criteriaChained = new ArrayList<>(1);
     private List<CriteriaEntry> queryCriteria = new ArrayList<>(1);
+
+    /**
+     *
+     */
+    public Criteria() {
+    }
 
     /**
      * Creates a new Criteria with provided field name
@@ -121,8 +127,7 @@ public class Criteria {
      * @return
      */
     public Criteria and(Criteria... criterias) {
-        this.criteriaChained.addAll(Arrays.asList(criterias));
-        return this;
+        return and(Arrays.asList(criterias));
     }
 
     /**
@@ -174,7 +179,7 @@ public class Criteria {
      * @param value
      * @return
      */
-    public Criteria is(Object value) {
+    public Criteria eq(Object value) {
         queryCriteria.add(new CriteriaEntry(this.field, OperationKey.EQUALS, value));
         return this;
     }
@@ -185,7 +190,7 @@ public class Criteria {
      * @param value
      * @return
      */
-    public Criteria isNot(Object value) {
+    public Criteria notEq(Object value) {
         queryCriteria.add(new CriteriaEntry(this.field, OperationKey.NOT_EQUALS, value));
         return this;
     }
@@ -255,7 +260,7 @@ public class Criteria {
      */
     public Criteria between(Comparable<?> lowerBound, Comparable<?> upperBound) {
         if (lowerBound == null && upperBound == null) {
-            throw new InvalidDataAccessApiUsageException("Range [* TO *] is not allowed");
+            throw new InvalidDataAccessApiUsageException("Range [* TO *] eq not allowed");
         }
         queryCriteria.add(new CriteriaEntry(this.field, OperationKey.BETWEEN, new Comparable<?>[]{lowerBound, upperBound}));
         return this;
@@ -438,6 +443,28 @@ public class Criteria {
     }
 
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        if (!criteriaChained.isEmpty()) {
+            criteriaChained.forEach(criteria -> {
+                if (builder.length() > 0) {
+                    builder.append(" ").append(this.conjunctionOperator).append(" ");
+                }
+                builder.append("(").append(criteria.toString()).append(")");
+            });
+        }
+        if (!queryCriteria.isEmpty()) {
+            queryCriteria.forEach(criteria -> {
+                if (builder.length() > 0) {
+                    builder.append(" ").append(this.conjunctionOperator).append(" ");
+                }
+                builder.append("(").append(criteria.toString()).append(")");
+            });
+        }
+        return builder.toString();
+    }
+
     /**
      *
      */
@@ -457,11 +484,10 @@ public class Criteria {
 
         @Override
         public String toString() {
-            return "CriteriaEntry{" +
-                    "field=" + field.getName() +
-                    ", key=" + key +
-                    ", value=" + value +
-                    '}';
+            if (key == OperationKey.BETWEEN) {
+                return field.getName() + " " + key + " " + ((Object[]) value)[0] + " to " + ((Object[]) value)[1];
+            }
+            return field.getName() + " " + key + (value == null ? "" : " " + value);
         }
     }
 

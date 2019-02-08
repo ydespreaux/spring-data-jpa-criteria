@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2018 Yoann Despréaux
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program eq free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program eq distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,14 +21,16 @@
 package com.github.ydespreaux.spring.data.jpa.configuration.entities;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 @Entity
 @Table(name = "book")
@@ -36,7 +38,6 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Book implements Serializable {
     /**
@@ -44,7 +45,11 @@ public class Book implements Serializable {
      */
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(
+            name = "native",
+            strategy = "native"
+    )
     private Long id;
     @Column(name = "title", length = 100, nullable = false, unique = true)
     private String title;
@@ -55,13 +60,18 @@ public class Book implements Serializable {
     private Genre genre;
     @Column(name = "price")
     private Double price;
+
+    @Column(name = "publication")
+    private LocalDate publication;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private Author author;
-    @Column(name = "editor", length = 255)
-    private String editor;
-    @Column(name = "publication")
-    private LocalDate publication;
+
+    @ManyToOne
+    @JoinColumn(name = "EDITOR_ID", nullable = true)
+    private Editor editor;
+
     @Version
     private Integer version;
 
@@ -69,30 +79,23 @@ public class Book implements Serializable {
         THRILLER, FANTASTIQUE, FICTION
     }
 
-    /**
-     * Properties path for search
-     */
-    public enum BookPropertyPath {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Book)) return false;
+        Book book = (Book) o;
+        return Objects.equals(getTitle(), book.getTitle()) &&
+                Objects.equals(getDescription(), book.getDescription()) &&
+                getGenre() == book.getGenre() &&
+                Objects.equals(getPrice(), book.getPrice()) &&
+                Objects.equals(getAuthor(), book.getAuthor()) &&
+                Objects.equals(getEditor(), book.getEditor()) &&
+                Objects.equals(getPublication(), book.getPublication());
+    }
 
-        TITLE("title"),
-        DESCRIPTION("description"),
-        GENRE("genre"),
-        PRICE("price"),
-        AUTHOR("author"),
-        AUTHOR_FIRSTNAME("author.firstName"),
-        AUTHOR_LASTNAME("author.lastName"),
-        EDITOR("editor"),
-        PUBLICATION("publication");
-
-        private final String propertyPath;
-
-        BookPropertyPath(String propertyPath) {
-            this.propertyPath = propertyPath;
-        }
-
-        public String getPropertyPath() {
-            return this.propertyPath;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitle(), getDescription(), getGenre(), getPrice(), getAuthor(), getEditor(), getPublication());
     }
 
 }

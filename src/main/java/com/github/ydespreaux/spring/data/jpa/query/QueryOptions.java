@@ -18,30 +18,45 @@
  * Please send bugreports with examples or suggestions to yoann.despreaux@believeit.fr
  */
 
-package com.github.ydespreaux.spring.data.jpa.repository.config;
+package com.github.ydespreaux.spring.data.jpa.query;
 
-import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepository;
-import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepositoryFactoryBean;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
+import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Yoann Despréaux
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class JpaCriteriaRepositoryConfigExtension extends JpaRepositoryConfigExtension {
+public class QueryOptions {
 
-    @Override
-    public String getRepositoryFactoryBeanClassName() {
-        return JpaCriteriaRepositoryFactoryBean.class.getName();
+    public static final QueryOptions DEFAULT = new QueryOptions();
+    @Getter
+    private final Set<String> associations = new HashSet<>();
+    @Getter
+    private boolean distinct = false;
+
+    public QueryOptions distinct(boolean distinct) {
+        this.distinct = distinct;
+        return this;
     }
 
-    @Override
-    protected Collection<Class<?>> getIdentifyingTypes() {
-        return Arrays.asList(JpaCriteriaRepository.class, JpaRepository.class);
+    public QueryOptions withAssociation(String association) {
+        this.associations.add(association);
+        return this;
     }
 
+    public QueryOptions withAssociation(String... associations) {
+        this.associations.addAll(Arrays.asList(associations));
+        return this;
+    }
+
+    /**
+     * @return
+     */
+    public boolean hasAssocations() {
+        return !this.associations.isEmpty();
+    }
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2018 Yoann Despréaux
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program eq free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program eq distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,15 +24,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.github.ydespreaux.spring.data.jpa.query.Criteria.CriteriaEntry;
 
 /**
  * @author Yoann Despréaux
- * @since 0.0.3
+ * @since 1.0.0
  */
 public class SpecificationCriteria<T> implements Specification<T> {
 
@@ -49,7 +47,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
         if (this.criteria == null) {
             return null;
         }
-        return toPredicate(this.criteria, root, cb);
+        return toPredicate(new HashMap<>(), this.criteria, root, cb);
     }
 
     /**
@@ -58,17 +56,17 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param cb
      * @return
      */
-    protected Predicate toPredicate(Criteria criteria, Root<T> root, CriteriaBuilder cb) {
+    private Predicate toPredicate(Map<String, Join<?, ?>> joinMap, Criteria criteria, Root<T> root, CriteriaBuilder cb) {
         List<Predicate> restrictions = new ArrayList<>();
         for (Criteria chainedCriteria : criteria.getCriteriaChain()) {
-            Predicate predicate = toPredicate(chainedCriteria, root, cb);
+            Predicate predicate = toPredicate(joinMap, chainedCriteria, root, cb);
             if (predicate != null) {
                 restrictions.add(predicate);
             }
         }
         List<CriteriaEntry> entries = criteria.getQueryCriteriaEntries();
         for (CriteriaEntry entry : entries) {
-            Predicate predicate = toPredicate(entry, root, cb);
+            Predicate predicate = toPredicate(joinMap, entry, root, cb);
             if (predicate != null) {
                 restrictions.add(predicate);
             }
@@ -93,8 +91,8 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param cb
      * @return
      */
-    protected Predicate toPredicate(CriteriaEntry entry, Root<T> root, CriteriaBuilder cb) {
-        Path<?> path = getPath(root, splitProperties(entry.getField().getName()));
+    private Predicate toPredicate(Map<String, Join<?, ?>> joinMap, CriteriaEntry entry, Root<T> root, CriteriaBuilder cb) {
+        Path<?> path = getPath(joinMap, root, root.getJavaType().getSimpleName(), splitProperties(entry.getField().getName()));
         return toPredicate(cb, path, entry);
     }
 
@@ -104,14 +102,19 @@ public class SpecificationCriteria<T> implements Specification<T> {
      * @param <Y>
      * @return
      */
-    protected <Y> Path<Y> getPath(From<T, ?> root, String... properties) {
+    private <Y> Path<Y> getPath(Map<String, Join<?, ?>> joinMap, From<T, ?> root, String currentPath, String... properties) {
         if (properties.length == 1) {
             return root.get(properties[0]);
         }
-        Join<T, ?> join = root.join(properties[0], JoinType.LEFT);
+        String path = currentPath + "." + properties[0];
+        Join<T, ?> join = (Join<T, ?>) joinMap.get(path);
+        if (join == null) {
+            join = root.join(properties[0], JoinType.LEFT);
+            joinMap.put(path, join);
+        }
         String[] newProperties = new String[properties.length - 1];
         System.arraycopy(properties, 1, newProperties, 0, newProperties.length);
-        return getPath(join, newProperties);
+        return getPath(joinMap, join, path, newProperties);
     }
 
     /**

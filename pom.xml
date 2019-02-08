@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.ydespreaux.spring.data</groupId>
     <artifactId>spring-data-jpa-criteria</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>spring-data-jpa-criteria</name>
     <description>Spring data JPA with criteria</description>
@@ -152,19 +152,16 @@
                     <excludes>
                         <exclude>**/IT*.java</exclude>
                     </excludes>
-                    <!--<excludes>-->
-                    <!--<exclude>**/*.java</exclude>-->
-                    <!--</excludes>-->
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <!--<configuration>-->
-                <!--<excludes>-->
-                <!--<exclude>**/*.java</exclude>-->
-                <!--</excludes>-->
-                <!--</configuration>-->
+                <configuration>
+                    <includes>
+                        <include>**/ITSuiteTest.java</include>
+                    </includes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>integration-tests</id>
@@ -270,7 +267,7 @@
                 <sonar.projectKey>${project.artifactId}:${project.version}</sonar.projectKey>
                 <sonar.projectName>${project.name}</sonar.projectName>
                 <sonar.host.url>http://localhost:9000</sonar.host.url>
-                <sonar.login>b8a6a70ad056ccd9455a4d11c08ba02ad683500d</sonar.login>
+                <sonar.login>0c955cf9d63358cfe11bda444af7d08672976740</sonar.login>
             </properties>
         </profile>
     </profiles>

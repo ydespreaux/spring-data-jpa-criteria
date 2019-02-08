@@ -18,30 +18,42 @@
  * Please send bugreports with examples or suggestions to yoann.despreaux@believeit.fr
  */
 
-package com.github.ydespreaux.spring.data.jpa.repository.config;
+package com.github.ydespreaux.spring.data.jpa.configuration.entities;
 
-import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepository;
-import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepositoryFactoryBean;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.JpaRepositoryConfigExtension;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Arrays;
-import java.util.Collection;
+import javax.persistence.*;
+import java.util.Objects;
 
-/**
- * @author Yoann Despréaux
- * @since 1.0.0
- */
-public class JpaCriteriaRepositoryConfigExtension extends JpaRepositoryConfigExtension {
+@Getter
+@Setter
+@Entity
+@Table(name = "editor")
+public class Editor {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(
+            name = "native",
+            strategy = "native"
+    )
+    private Long id;
+
+    @Column(nullable = false)
+    private String label;
 
     @Override
-    public String getRepositoryFactoryBeanClassName() {
-        return JpaCriteriaRepositoryFactoryBean.class.getName();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Editor)) return false;
+        Editor editor = (Editor) o;
+        return Objects.equals(getLabel(), editor.getLabel());
     }
 
     @Override
-    protected Collection<Class<?>> getIdentifyingTypes() {
-        return Arrays.asList(JpaCriteriaRepository.class, JpaRepository.class);
+    public int hashCode() {
+        return Objects.hash(getLabel());
     }
-
 }
