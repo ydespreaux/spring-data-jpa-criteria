@@ -21,7 +21,6 @@
 package com.github.ydespreaux.spring.data.jpa.query;
 
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.criteria.*;
 import java.util.*;
@@ -43,7 +42,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
     }
 
     @Override
-    public Predicate toPredicate(@NonNull Root<T> root, @NonNull CriteriaQuery<?> query, @NonNull CriteriaBuilder cb) {
+    public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         if (this.criteria == null) {
             return null;
         }

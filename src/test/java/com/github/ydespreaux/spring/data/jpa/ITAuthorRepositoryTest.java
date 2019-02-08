@@ -107,7 +107,7 @@ public class ITAuthorRepositoryTest {
     @Test
     @Transactional(propagation = Propagation.NEVER)
     public void findAllWithAssociationAndSort() {
-        List<Author> result = this.authorRepository.findAll(null, Sort.by(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books"));
+        List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books"));
         Assert.assertThat(result.size(), is(equalTo(3)));
         Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
         Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
@@ -117,7 +117,7 @@ public class ITAuthorRepositoryTest {
     @Test
     @Transactional(propagation = Propagation.NEVER)
     public void findAllWithAllAssociationAndSort() {
-        List<Author> result = this.authorRepository.findAll(null, Sort.by(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books", "books.editor"));
+        List<Author> result = this.authorRepository.findAll(null, new Sort(Sort.Direction.ASC, "lastName"), new QueryOptions().withAssociation("books", "books.editor"));
         Assert.assertThat(result.size(), is(equalTo(3)));
         Assert.assertThat(result.get(0).getLastName(), is(equalTo(ITSuiteTest.nicolasBeuglet)));
         Assert.assertThat(result.get(1).getLastName(), is(equalTo(ITSuiteTest.harlanCoben)));
@@ -134,7 +134,7 @@ public class ITAuthorRepositoryTest {
      * @return
      */
     private Pageable createPageable(int page, int size) {
-        return PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "lastName", "firstName"));
+        return new PageRequest(page, size, new Sort(Sort.Direction.ASC, "lastName", "firstName"));
     }
 
 }

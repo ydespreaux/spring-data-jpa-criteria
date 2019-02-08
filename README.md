@@ -10,7 +10,7 @@ This library defines a repository for performing dynamic queries using a criteri
 
 |   spring-data-jpa-criteria   |    spring-boot   |
 |:----------------------------:|:----------------:|
-|           1.1.0              |   2.1.x.RELEASE  |
+|           1.0.1              |   1.5.x.RELEASE  |
 
 ## Add maven dependency
 
@@ -18,7 +18,7 @@ This library defines a repository for performing dynamic queries using a criteri
 <dependency>
     <groupId>com.github.ydespreaux.spring.data</groupId>
     <artifactId>spring-data-jpa-criteria</artifactId>
-    <version>1.1.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -145,8 +145,8 @@ The JpaCriteriaRepository interface implements search methods that take into acc
 
 ```java
 public interface JpaCriteriaRepository<T, ID> extends JpaRepository<T, ID> {
-    Optional<T> findOne(@Nullable Criteria criteria);
-    Optional<T> findOne(@Nullable Criteria criteria, QueryOptions options);
+    T findOne(@Nullable Criteria criteria);
+    T findOne(@Nullable Criteria criteria, QueryOptions options);
     List<T> findAll(@Nullable Criteria criteria);
     List<T> findAll(@Nullable Criteria criteria, QueryOptions options);
     List<T> findAll(@Nullable Criteria criteria, Sort sort);

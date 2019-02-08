@@ -20,7 +20,9 @@
 
 package com.github.ydespreaux.spring.data.jpa.repository.support;
 
-import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.io.Serializable;
 
 /**
  * @param <T> Entity type
@@ -28,6 +30,6 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryImplementati
  * @author Yoann Despréaux
  * @since 1.0.0
  */
-public interface JpaCriteriaRepository<T, K> extends JpaRepositoryImplementation<T, K>, JpaCriteriaExecutor<T> {
+public interface JpaCriteriaRepository<T, K extends Serializable> extends JpaRepository<T, K>, JpaCriteriaExecutor<T> {
 
 }

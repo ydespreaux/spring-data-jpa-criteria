@@ -25,10 +25,8 @@ import com.github.ydespreaux.spring.data.jpa.query.QueryOptions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * *
@@ -43,7 +41,7 @@ public interface JpaCriteriaExecutor<T> {
      * @param criteria
      * @return
      */
-    default Optional<T> findOne(@Nullable Criteria criteria) {
+    default T findOne(Criteria criteria) {
         return findOne(criteria, QueryOptions.DEFAULT);
     }
 
@@ -52,13 +50,13 @@ public interface JpaCriteriaExecutor<T> {
      * @param options
      * @return
      */
-    Optional<T> findOne(@Nullable Criteria criteria, QueryOptions options);
+    T findOne(Criteria criteria, QueryOptions options);
 
     /**
      * @param criteria
      * @return
      */
-    default List<T> findAll(@Nullable Criteria criteria) {
+    default List<T> findAll(Criteria criteria) {
         return findAll(criteria, QueryOptions.DEFAULT);
     }
 
@@ -67,14 +65,14 @@ public interface JpaCriteriaExecutor<T> {
      * @param options
      * @return
      */
-    List<T> findAll(@Nullable Criteria criteria, QueryOptions options);
+    List<T> findAll(Criteria criteria, QueryOptions options);
 
     /**
      * @param criteria
      * @param pageable
      * @return
      */
-    default Page<T> findAll(@Nullable Criteria criteria, Pageable pageable) {
+    default Page<T> findAll(Criteria criteria, Pageable pageable) {
         return findAll(criteria, pageable, QueryOptions.DEFAULT);
     }
 
@@ -84,14 +82,14 @@ public interface JpaCriteriaExecutor<T> {
      * @param options
      * @return
      */
-    Page<T> findAll(@Nullable Criteria criteria, Pageable pageable, QueryOptions options);
+    Page<T> findAll(Criteria criteria, Pageable pageable, QueryOptions options);
 
     /**
      * @param criteria
      * @param sort
      * @return
      */
-    default List<T> findAll(@Nullable Criteria criteria, Sort sort) {
+    default List<T> findAll(Criteria criteria, Sort sort) {
         return findAll(criteria, sort, QueryOptions.DEFAULT);
     }
 
@@ -101,13 +99,13 @@ public interface JpaCriteriaExecutor<T> {
      * @param options
      * @return
      */
-    List<T> findAll(@Nullable Criteria criteria, Sort sort, QueryOptions options);
+    List<T> findAll(Criteria criteria, Sort sort, QueryOptions options);
 
     /**
      * @param criteria
      * @return
      */
-    default long count(@Nullable Criteria criteria) {
+    default long count(Criteria criteria) {
         return count(criteria, QueryOptions.DEFAULT);
     }
 
@@ -116,5 +114,5 @@ public interface JpaCriteriaExecutor<T> {
      * @param options
      * @return
      */
-    long count(@Nullable Criteria criteria, QueryOptions options);
+    long count(Criteria criteria, QueryOptions options);
 }

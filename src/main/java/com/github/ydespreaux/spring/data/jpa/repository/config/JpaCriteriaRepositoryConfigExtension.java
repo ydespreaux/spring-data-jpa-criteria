@@ -35,7 +35,7 @@ import java.util.Collection;
 public class JpaCriteriaRepositoryConfigExtension extends JpaRepositoryConfigExtension {
 
     @Override
-    public String getRepositoryFactoryBeanClassName() {
+    public String getRepositoryFactoryClassName() {
         return JpaCriteriaRepositoryFactoryBean.class.getName();
     }
 

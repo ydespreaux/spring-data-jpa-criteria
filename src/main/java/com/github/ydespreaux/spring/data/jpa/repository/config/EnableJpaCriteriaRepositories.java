@@ -23,7 +23,6 @@ package com.github.ydespreaux.spring.data.jpa.repository.config;
 import com.github.ydespreaux.spring.data.jpa.repository.support.JpaCriteriaRepositoryFactoryBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.repository.config.BootstrapMode;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 
@@ -66,6 +65,4 @@ public @interface EnableJpaCriteriaRepositories {
     boolean considerNestedRepositories() default false;
 
     boolean enableDefaultTransactions() default true;
-
-    BootstrapMode bootstrapMode() default BootstrapMode.DEFAULT;
 }

@@ -34,7 +34,6 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.support.PageableExecutionUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
@@ -101,12 +100,12 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
     }
 
     @Override
-    public Optional<T> findOne(Criteria criteria, QueryOptions options) {
+    public T findOne(Criteria criteria, QueryOptions options) {
         try {
-            TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), Sort.unsorted(), options);
-            return Optional.of(query.getSingleResult());
+            TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), null, options);
+            return query.getSingleResult();
         } catch (NoResultException var3) {
-            return Optional.empty();
+            return null;
         }
     }
 
@@ -127,7 +126,7 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      */
     @Override
     public List<T> findAll(Criteria criteria, Sort sort, QueryOptions options) {
-        TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), sort == null ? Sort.unsorted() : sort, options);
+        TypedQuery<T> query = this.getTypedQuery(new SpecificationCriteria<>(criteria), sort, options);
         return query.getResultList();
     }
 
@@ -139,9 +138,8 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
     @Override
     public Page<T> findAll(Criteria criteria, Pageable pageable, QueryOptions options) {
         Specification<T> specification = new SpecificationCriteria<>(criteria);
-        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
-        TypedQuery<T> query = this.getTypedQuery(specification, sort, options);
-        return (Page) (pageable.isUnpaged() ? new PageImpl(query.getResultList()) : this.readPage(query, this.getDomainClass(), pageable, specification, options));
+        TypedQuery<T> query = this.getTypedQuery(specification, pageable == null ? null : pageable.getSort(), options);
+        return (Page) (pageable == null ? new PageImpl(query.getResultList()) : this.readPage(query, this.getDomainClass(), pageable, specification, options));
     }
 
     /**
@@ -227,11 +225,9 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      * @param <S>
      * @return
      */
-    private <S extends T> Page<S> readPage(TypedQuery<S> query, Class<S> domainClass, Pageable pageable, @Nullable Specification<S> spec, QueryOptions options) {
-        if (pageable.isPaged()) {
-            query.setFirstResult((int) pageable.getOffset());
-            query.setMaxResults(pageable.getPageSize());
-        }
+    private <S extends T> Page<S> readPage(TypedQuery<S> query, Class<S> domainClass, Pageable pageable, Specification<S> spec, QueryOptions options) {
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
         return PageableExecutionUtils.getPage(query.getResultList(), pageable, () -> executeCountQuery(this.getCountQuery(spec, domainClass, options)));
     }
 
@@ -243,7 +239,7 @@ public class SimpleJpaCriteriaRepository<T, K extends Serializable> extends Simp
      * @param <S>
      * @return
      */
-    private <S extends T> TypedQuery<Long> getCountQuery(@Nullable Specification<S> spec, Class<S> domainClass, QueryOptions options) {
+    private <S extends T> TypedQuery<Long> getCountQuery(Specification<S> spec, Class<S> domainClass, QueryOptions options) {
         CriteriaBuilder builder = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<S> root = this.applySpecification(spec, domainClass, query);
