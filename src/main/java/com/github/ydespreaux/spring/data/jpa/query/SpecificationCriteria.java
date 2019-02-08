@@ -36,7 +36,7 @@ public class SpecificationCriteria<T> implements Specification<T> {
 
     private static final long serialVersionUID = 3295157927853086841L;
 
-    private transient Criteria criteria;
+    private Criteria criteria;
 
     public SpecificationCriteria(Criteria criteria) {
         this.criteria = criteria;
