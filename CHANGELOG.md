@@ -7,19 +7,28 @@
 
 ### Fixed
 
-## [1.1.0] - 2019/02/05
+## [1.2.0] - 2019/02/08
 ### Added
-- Add QueryOptions (specify distinct query, fetch associations in query)
+- Migration Spring Boot 2.1.x
 
 ### Changed
-- Refactoring API Criteria operators
 
 ### Fixed
 
-## [1.0.0] - 2019/01/10
+
+## [1.1.0] - 2019/02/05
+### Added
+- Migration Spring Boot 2.0.x
+
+### Changed
+
+### Fixed
+
+## [1.0.1] - 2019/01/10
 ### Added
 - JpaCriteriaRepository add generic methods for search with Criteria
 
 ### Changed
 
 ### Fixed
+
