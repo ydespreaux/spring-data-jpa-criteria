@@ -20,16 +20,9 @@
 
 package com.github.ydespreaux.spring.data.jpa.repository.support;
 
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.querydsl.EntityPathResolver;
-import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-
-import javax.persistence.EntityManager;
 
 /**
  * @param <T>
@@ -46,17 +39,5 @@ public class JpaCriteriaRepositoryFactoryBean<T extends Repository<S, K>, S, K> 
         super(repositoryInterface);
     }
 
-    @Override
-    protected RepositoryFactorySupport createRepositoryFactory(EntityManager entityManager) {
-        JpaRepositoryFactory jpaRepositoryFactory = new JpaCriteriaRepositoryFactory(entityManager);
-        jpaRepositoryFactory.setEntityPathResolver(this.entityPathResolver);
-        return jpaRepositoryFactory;
-    }
-
-    @Autowired
-    @Override
-    public void setEntityPathResolver(ObjectProvider<EntityPathResolver> resolver) {
-        this.entityPathResolver = resolver.getIfAvailable(() -> SimpleEntityPathResolver.INSTANCE);
-    }
 
 }

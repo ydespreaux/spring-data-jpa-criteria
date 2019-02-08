@@ -10,7 +10,8 @@ This library defines a repository for performing dynamic queries using a criteri
 
 |   spring-data-jpa-criteria   |    spring-boot   |
 |:----------------------------:|:----------------:|
-|           1.1.0              |   2.1.x.RELEASE  |
+|           1.1.0              |   2.0.x.RELEASE  |
+|           1.0.1              |   1.5.x.RELEASE  |
 
 ## Add maven dependency
 
